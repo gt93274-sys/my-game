@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Tatiana's Minion Run: Temple Escape</title>
+<style>
+:root {
+  --a:#a855f7; --b:#d8b4fe; --bg:#090b16;
+  --panel:#171a2b; --line:#ffffff19; --gold:#ffdb70;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#fff;font:15px Arial,sans-serif}
+button,input,select{font:inherit}
+button{border:1px solid #ffffff20;border-radius:12px;padding:12px 16px;
+ color:#fff;font-weight:bold;background:linear-gradient(135deg,var(--a),#41328e);
+ cursor:pointer;transition:.15s}
+button:hover{filter:brightness(1.17);transform:translateY(-1px)}
+button:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.secondary{background:#27283b}
+.goldbtn{background:linear-gradient(135deg,#ffdf80,#b87922);color:#291b0b}
+#app{max-width:1120px;margin:auto;padding:14px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:15px}
+.logo{font-weight:1000;font-size:clamp(19px,4vw,30px);color:var(--gold);letter-spacing:-1px}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:10px 13px;border:1px solid var(--line);background:var(--panel);border-radius:12px;font-weight:bold}
+.screen{display:none}.screen.active{display:block}
+.panel{background:linear-gradient(145deg,#22243b,#121522);border:1px solid var(--line);border-radius:21px;padding:20px;margin-bottom:14px}
+.hero{position:relative;overflow:hidden;text-align:center;padding:30px 20px;
+ background:radial-gradient(ellipse at 50% 0%,#64468c 0%,#24203d 45%,#10121e 100%)}
+.hero:after{content:"";position:absolute;bottom:0;left:0;right:0;height:5px;background:linear-gradient(90deg,transparent,var(--a),var(--gold),transparent)}
+.hero h1{font-size:clamp(35px,7vw,72px);line-height:.92;margin:12px 0;color:var(--gold);text-shadow:0 5px #71451b}
+.hero p{max-width:570px;margin:17px auto;color:#e5dff3;line-height:1.6}
+.eyebrow{letter-spacing:3px;font-size:11px;font-weight:bold;color:var(--b)}
+.heroart{font-size:74px;line-height:1.4;filter:drop-shadow(0 8px 10px #0008)}
+.menu{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.menubtn{min-height:92px;text-align:left;display:flex;flex-direction:column;justify-content:center;gap:7px;font-size:17px}
+.menubtn small{font-size:12px;font-weight:normal;line-height:1.35;opacity:.8}
+h2,h3,p{margin-top:0}
+h2{font-size:24px}
+.muted{color:#b8bdd2;line-height:1.55}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:11px}
+.tile{padding:15px;border:1px solid var(--line);background:#ffffff06;border-radius:15px}
+.tile h3{margin:8px 0;font-size:16px}
+.tile p{font-size:13px;color:#b8bdd2;line-height:1.5}
+.bigicon{font-size:34px}
+.progress{height:9px;border-radius:20px;background:#080a12;overflow:hidden}
+.progress div{height:100%;width:0;background:linear-gradient(90deg,var(--a),var(--gold))}
+.levelgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}
+.level{aspect-ratio:1;display:grid;place-items:center;font-size:19px;padding:3px;background:#303249}
+.level.done{background:#72551d;color:#ffe9a0}
+.level.current{outline:3px solid var(--b)}
+.level.seallevel{border-color:#e5bd58}
+#gamebox{position:relative;border-radius:18px;overflow:hidden;border:1px solid #ffffff30;background:#101326}
+canvas{display:block;width:100%;height:auto;touch-action:none}
+#hud{position:absolute;top:10px;left:10px;right:10px;display:flex;gap:6px;justify-content:flex-start;pointer-events:none}
+#hud .hudchip:last-child{margin-left:auto}
+#hud .hudchip{box-shadow:0 3px 12px #0005;backdrop-filter:blur(4px)}
+.hudchip{background:#090b16dd;border:1px solid #ffffff22;border-radius:10px;padding:8px 10px;font-size:12px;font-weight:bold}
+#banner{position:absolute;top:62px;left:0;right:0;text-align:center;pointer-events:none;font-size:12px;font-weight:bold;color:var(--gold);text-shadow:0 2px #000}
+#overlay{display:none;position:absolute;inset:0;background:#080a12e8;backdrop-filter:blur(5px);align-items:center;justify-content:center;text-align:center;padding:20px;overflow:auto}
+#overlay.show{display:flex}
+.overlaycard{max-width:440px;width:100%;padding:18px}
+.overlayicon{font-size:58px}
+#ovalt{display:none;margin:8px 6px 0;background:linear-gradient(135deg,#58c98b,#287854);color:#071d14}
+.overlaycard p{line-height:1.6;color:#c3c4d7}
+#controls{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin:11px 0}
+.ctrl{min-height:55px;padding:8px 4px;font-size:18px}
+.ctrl small{display:block;font-size:9px;margin-top:3px}
+#powerdock{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:11px 0}
+.powerbtn{min-height:66px;padding:9px 8px;background:linear-gradient(145deg,#22283c,#141827);border-color:#ffffff28}
+.powerbtn.ready{border-color:#70e4f1;background:linear-gradient(145deg,#174750,#17283b);box-shadow:0 0 15px #54d5e833}
+.powerbtn .powerlabel{display:block;font-size:11px;margin-top:4px}
+.powerbtn .powercount{color:var(--gold)}
+.powerhelp{text-align:center;color:#9fa5bf;font-size:11px;margin:0 0 10px}
+@media(max-width:420px){#powerdock{gap:5px}.powerbtn{font-size:13px;padding:8px 3px}}
+#mobiletip{text-align:center;font-size:11px;color:#9fa5bf;line-height:1.6}
+input[type=range]{width:100%;accent-color:var(--a)}
+select{background:#25263c;color:white;padding:11px;border-radius:10px;border:1px solid var(--line);max-width:100%}
+.seal{height:65px;width:65px;display:grid;place-items:center;border-radius:50%;font-size:31px;flex-shrink:0;
+ background:radial-gradient(circle,#fff7c0,#e6ad35 53%,#79501b 75%,#f8db7b 78%,#89551d 88%);
+ box-shadow:0 0 20px #ffdc6b44,inset 0 0 0 2px #fff6ac}
+.seal.locked{filter:grayscale(1);opacity:.3}
+footer{text-align:center;color:#777f9a;padding:24px 0;font-size:11px}
+@media(max-width:650px){
+ #app{padding:9px}.panel{padding:14px}.menu{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .menubtn{font-size:15px;padding:12px;min-height:83px}
+ .levelgrid{grid-template-columns:repeat(5,1fr)}
+ .hero{padding:23px 12px}.heroart{font-size:58px}
+ #controls{grid-template-columns:repeat(5,minmax(0,1fr))}
+ .ctrl{font-size:15px}
+}
+.journalgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.contract{position:relative;overflow:hidden;border:1px solid #ffffff20;background:linear-gradient(145deg,#ffffff0a,#ffffff03);border-radius:15px;padding:15px}
+.contract.done{border-color:#f5d26a88;background:linear-gradient(145deg,#e8b84720,#ffffff04)}
+.contract h3{margin:8px 0 6px}.contract p{font-size:13px;color:#b8bdd2;line-height:1.5}
+.contract .progress{margin:12px 0 7px}
+.contract .progress div{transition:width .2s}
+.contract-icon{font-size:29px}
+.journal-stat{padding:14px;border-radius:14px;border:1px solid var(--line);background:#ffffff06}
+.journal-stat b{display:block;font-size:22px;color:var(--gold);margin-top:5px}
+.guide-step{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line)}
+.guide-step:last-child{border-bottom:0}
+.guide-step span{font-size:24px;min-width:34px;text-align:center}
+.tag{display:inline-block;padding:4px 8px;border-radius:20px;background:#ffffff12;color:var(--b);font-size:11px;font-weight:bold}
+@media(max-width:650px){.journalgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+ <div class="logo">🍌 BANANA BOULEVARD</div>
+ <div class="stats">
+  <div class="chip">🍌 <span id="bank">0</span></div>
+  <div class="chip">🏵️ <span id="sealbank">0</span></div>
+ </div>
+</header>
+
+<section id="home" class="screen active">
+ <div class="panel hero">
+  <div class="eyebrow">AN ORIGINAL RUNNER ADVENTURE</div>
+  <div class="heroart">🟡 🏛️ 🍌</div>
+  <h1>TEMPLE<br>ESCAPE</h1>
+  <p>Ancient ruins. Dangerous paths. A creature on your heels.
+  Run through the lost temple, collect the golden bananas, and uncover what lies beyond the gates.</p>
+  <button class="goldbtn" onclick="begin('level',nextLevel())">▶ ENTER THE TEMPLE</button>
+  <p style="font-size:11px;margin-bottom:0">Your adventure saves automatically in this browser.</p>
+ </div>
+ <div class="menu">
+  <button class="menubtn" onclick="show('levels')">🗺️ LEVEL JOURNEY<small>Explore 30 challenges</small></button>
+  <button class="menubtn" onclick="begin('free')">♾️ ENDLESS RUN<small>Beat your distance record</small></button>
+  <button class="menubtn" onclick="show('tutorial')">🎮 TRAINING<small>Learn the controls first</small></button>
+  <button class="menubtn" onclick="show('shop')">🕶️ COSTUME LAB<small>Unlock new looks</small></button>
+  <button class="menubtn" onclick="show('secrets')">🔐 SECRET ARCHIVE<small>Find hidden achievements</small></button>
+  <button class="menubtn" onclick="show('journal')">📜 FIELD JOURNAL<small>Daily contracts, records, and field notes</small></button>
+  <button class="menubtn" onclick="show('settings')">⚙️ SETTINGS<small>Colors, sound, difficulty</small></button>
+ </div>
+ <div class="panel" style="margin-top:14px">
+  <div class="row"><h3>🏆 Adventure progress</h3><span id="progressLabel">Level 1 / 30</span></div>
+  <div class="progress"><div id="progressBar"></div></div>
+  <p class="muted" id="homeQuest" style="margin:10px 0 0">Mission: collect 25 bananas.</p>
+ </div>
+ <div class="panel">
+  <h3>📖 Your field guide</h3>
+  <p class="muted">Move between three lanes. Jump over broken stone barriers. Slide under hanging traps. At marked intersections, turn in the indicated direction. Stay alive long enough to escape the temple.</p>
+ </div>
+</section>
+
+<section id="levels" class="screen">
+ <div class="panel">
+  <div class="row"><h2>🗺️ Temple expedition</h2><button class="secondary" onclick="show('home')">← Menu</button></div>
+  <p class="muted">Finish a level to unlock the next. At a randomized point during a run, choose whether to cross a portal into a dark mirror-world or stay on the bright temple path. Endless runs also feature recurring portals; each dark-world visit ends after a short distance. Levels 3, 6, 9, and every third level after that grant a collectible seal.</p>
+  <div class="levelgrid" id="levelgrid"></div>
+  <div class="row" style="margin-top:16px"><div><b id="levelSummary">0 / 30 complete</b><p class="muted" style="margin:5px 0">Find every seal.</p></div><button onclick="begin('level',nextLevel())">CONTINUE →</button></div>
+ </div>
+ <div class="panel"><h3>🏵️ Seal collection</h3><div class="grid" id="sealgrid"></div></div>
+</section>
+
+<section id="tutorial" class="screen">
+ <div class="panel">
+  <div class="row"><h2>🎮 Expedition training</h2><button class="secondary" onclick="show('home')">← Menu</button></div>
+  <p class="muted">Learn the moves before entering the ruins. The tutorial run will guide you through the basics.</p>
+  <div class="grid">
+   <div class="tile"><div class="bigicon">⬅️ ➡️</div><h3>Change lanes</h3><p>Swipe left or right, press A/D, use the arrow keys, or tap the lane buttons.</p></div>
+   <div class="tile"><div class="bigicon">⬆️</div><h3>Jump</h3><p>Swipe up, press W or Space, or tap JUMP to clear broken stone barriers.</p></div>
+   <div class="tile"><div class="bigicon">⬇️</div><h3>Slide</h3><p>Swipe down, press S or Down, or tap SLIDE to duck beneath low traps.</p></div>
+   <div class="tile"><div class="bigicon">↪️</div><h3>Turn at junctions</h3><p>When a turn warning appears, follow its arrow before you reach the gate.</p></div>
+   <div class="tile"><div class="bigicon">🛡️</div><h3>Power-ups</h3><p>Collect shields, magnets, and lightning boosts. Their remaining time appears in the HUD.</p></div>
+   <div class="tile"><div class="bigicon">👹</div><h3>Watch the chaser</h3><p>Collisions push the monster closer. Keep running or it will catch you.</p></div>
+  </div>
+  <button style="width:100%;margin-top:15px" onclick="begin('tutorial')">START GUIDED TRAINING</button>
+ </div>
+</section>
+
+<section id="journal" class="screen">
+ <div class="panel">
+  <div class="row"><div><h2>📜 Expedition field journal</h2><p class="muted" style="margin-bottom:0">A living record of your discoveries, skill, and temple expeditions.</p></div><button class="secondary" onclick="show('home')">← Menu</button></div>
+ </div>
+ <div class="panel">
+  <div class="row"><div><h2>🌞 Daily contracts</h2><p class="muted" id="dailyDate" style="margin-bottom:0">New contracts arrive each day.</p></div><span class="tag" id="dailyRewardLabel">REWARDS: 0 🍌</span></div>
+  <div class="journalgrid" id="dailygrid" style="margin-top:14px"></div>
+ </div>
+ <div class="panel">
+  <h2>🎖️ Explorer milestones</h2>
+  <p class="muted">Long-term goals grant one-time banana rewards. Claim each reward as soon as its requirement is met.</p>
+  <div class="journalgrid" id="milestoneGrid"></div>
+ </div>
+ <div class="panel">
+  <h2>📊 Explorer's record</h2>
+  <div class="grid" id="journalStats"></div>
+ </div>
+ <div class="panel">
+  <h2>🧭 Field notes</h2>
+  <p class="muted">The temple rewards rhythm more than reckless speed. Read the ground, make a plan, and treat every junction as a decision.</p>
+  <div class="guide-step"><span>🛣️</span><div><b>Three lanes, one safe route</b><p class="muted" style="margin:5px 0 0">Lane changes move gradually. Aim for a clear lane before an obstacle reaches the foreground; a last-moment switch may not finish in time.</p></div></div>
+  <div class="guide-step"><span>🪨</span><div><b>Read each hazard</b><p class="muted" style="margin:5px 0 0">Jump broken barriers and gaps. Slide under the hanging DUCK signs. Crates block the path, so change lanes or jump over them.</p></div></div>
+  <div class="guide-step"><span>↪️</span><div><b>Junction warnings are timed</b><p class="muted" style="margin:5px 0 0">When a turn warning appears, tap TURN or swipe toward the arrow before the junction passes. A successful turn adds distance.</p></div></div>
+  <div class="guide-step"><span>🛡️</span><div><b>Power-ups are temporary</b><p class="muted" style="margin:5px 0 0">Shields absorb a collision, magnets pull nearby bananas toward your lane, and boosts raise your speed. Their active state is shown in the HUD.</p></div></div>
+  <div class="guide-step"><span>👹</span><div><b>Collisions raise the danger</b><p class="muted" style="margin:5px 0 0">A hit brings the chaser closer. Brief grace time prevents repeated damage from one mistake, but consecutive hazards can end the expedition.</p></div></div>
+  <div class="guide-step"><span>🏵️</span><div><b>Seal levels mark milestones</b><p class="muted" style="margin:5px 0 0">Every third temple level awards a seal when completed. Rare seals may also appear on the road and add bonus bananas.</p></div></div>
+ </div>
+ <div class="panel">
+  <h2>📚 Hazard and treasure index</h2>
+  <p class="muted">A quick field reference for everything that can appear on the road.</p>
+  <div class="journalgrid" id="codexGrid"></div>
+ </div>
+ <div class="panel">
+  <div class="row"><div><h2>🧾 Recent expeditions</h2><p class="muted" style="margin-bottom:0">Your latest twelve completed or ended runs.</p></div><span class="tag">LOCAL RUN HISTORY</span></div>
+  <div class="grid" id="historyGrid" style="margin-top:14px"></div>
+ </div>
+</section>
+
+<section id="settings" class="screen">
+ <div class="panel">
+  <div class="row"><h2>⚙️ Game settings</h2><button class="secondary" onclick="show('home')">← Menu</button></div>
+  <h3>World color</h3>
+  <div class="grid">
+   <button onclick="theme('pink')">🩷 Pink world</button>
+   <button onclick="theme('blue')">💙 Blue world</button>
+   <button onclick="theme('black')">🖤 Black world</button>
+   <button onclick="theme('purple')">💜 Purple world</button>
+  </div>
+  <div class="tile" style="margin-top:14px"><h3>🔊 Sound</h3>
+   <label><input id="soundEnabled" type="checkbox" checked onchange="saveSettings()"> Enable sound effects</label>
+   <p class="muted">Game sounds are synthesized by your browser.</p>
+   <label for="volume">Sound volume</label><input id="volume" type="range" min="0" max="100" value="40" oninput="saveSettings()">
+  </div>
+  <div class="tile" style="margin-top:12px"><h3>⚡ Difficulty</h3>
+   <select id="difficulty" onchange="saveSettings()">
+    <option value="chill">Chill — slower speed</option>
+    <option value="normal">Normal — balanced</option>
+    <option value="chaos">Chaos — faster and harder</option>
+   </select>
+  </div>
+  <div class="tile" style="margin-top:12px"><h3>🧹 Reset adventure</h3>
+   <p class="muted">Delete your local coins, records, seals, levels, and costumes.</p>
+   <button onclick="resetSave()">RESET ALL PROGRESS</button>
+  </div>
+ </div>
+</section>
+
+<section id="shop" class="screen">
+ <div class="panel">
+  <div class="row"><h2>🕶️ Costume laboratory</h2><button class="secondary" onclick="show('home')">← Menu</button></div>
+  <p class="muted">Collect bananas to buy outfits. Secret costumes must be discovered during your adventure.</p>
+  <div class="grid" id="shopgrid"></div>
+ </div>
+</section>
+
+<section id="secrets" class="screen">
+ <div class="panel">
+  <div class="row"><h2>🔐 Secret archive</h2><button class="secondary" onclick="show('home')">← Menu</button></div>
+  <p class="muted">Not everything in the temple appears on the map. Complete unusual challenges to discover hidden rewards.</p>
+  <div class="grid" id="secretgrid"></div>
+ </div>
+</section>
+
+<section id="game" class="screen">
+ <div class="row" style="margin-bottom:10px">
+  <div><h2 id="gametitle" style="margin-bottom:5px">Level 1</h2><div class="muted" id="objective">Reach the temple exit.</div></div>
+  <button class="secondary" onclick="pause()">Ⅱ PAUSE</button>
+ </div>
+ <div id="gamebox">
+  <canvas id="cv" width="900" height="540"></canvas>
+  <div id="hud">
+   <div class="hudchip">🍌 <span id="runcoins">0</span></div>
+   <div class="hudchip">📏 <span id="meters">0</span> m</div>
+   <div class="hudchip">⚡ <span id="speedhud">SLOW</span></div>
+   <div class="hudchip">🛡️ <span id="powerhud">NONE</span></div>
+  </div>
+  <div id="banner"></div>
+  <div id="overlay"><div class="overlaycard">
+   <div class="overlayicon" id="ovicon">⏸️</div><h2 id="ovtitle">PAUSED</h2><p id="ovtext">Take a breath.</p>
+   <button id="ovmain" onclick="resume()">RESUME</button>
+   <button id="ovalt" onclick="stayInBrightWorld()">STAY IN THE BRIGHT WORLD</button>
+   <button class="secondary" style="margin-top:8px" onclick="exitRun()">EXIT TO MENU</button>
+  </div></div>
+ </div>
+ <div id="controls">
+  <button class="ctrl secondary" onclick="act('left')">⬅️<small>LEFT</small></button>
+  <button class="ctrl secondary" onclick="act('jump')">⬆️<small>JUMP</small></button>
+  <button class="ctrl secondary" onclick="act('slide')">⬇️<small>SLIDE</small></button>
+  <button class="ctrl secondary" onclick="act('right')">➡️<small>RIGHT</small></button>
+  <button class="ctrl" onclick="act('turn')">↪️<small>TURN</small></button>
+ </div>
+ <div id="powerdock" aria-label="Power-up inventory">
+  <button class="powerbtn" id="use-shield" onclick="usePower('shield')">🛡️ <span class="powercount" id="count-shield">0</span><span class="powerlabel">SHIELD · USE</span></button>
+  <button class="powerbtn" id="use-magnet" onclick="usePower('magnet')">🧲 <span class="powercount" id="count-magnet">0</span><span class="powerlabel">MAGNET · USE</span></button>
+  <button class="powerbtn" id="use-boost" onclick="usePower('boost')">⚡ <span class="powercount" id="count-boost">0</span><span class="powerlabel">BOOST · USE</span></button>
+ </div>
+ <p class="powerhelp">Collect a power-up, then tap its button to activate it · Keyboard: 1 shield, 2 magnet, 3 boost.</p>
+ <p id="mobiletip">Swipe to move · Space/W to jump · S/↓ to slide · P/Esc to pause · Follow turn arrows at junctions.</p>
+ <div class="panel"><div class="row"><b>🏃 Run status</b><span id="runstatus">Expedition in progress</span></div><div class="progress" style="margin-top:10px"><div id="runbar"></div></div></div>
+</section>
+<footer>BANANA BOULEVARD · TEMPLE ESCAPE EDITION · Original browser game</footer>
+</div>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const cv=$("cv"),ctx=cv.getContext("2d",{alpha:false});
+
+const palettes={
+ pink:["#ec4899","#f9a8d4","#180c20","#59334f"],
+ blue:["#3b82f6","#7dd3fc","#081627","#1c4160"],
+ black:["#8b8b99","#d1d5db","#090a0e","#343441"],
+ purple:["#a855f7","#d8b4fe","#100b1b","#3b2858"]
+};
+
+const BASE={
+ coins:0,completed:0,seals:[],best:0,theme:"purple",difficulty:"normal",
+ owned:["classic"],costume:"classic",secrets:[],totalBananas:0,totalRuns:0,
+ longest:0,turns:0,jumps:0,slides:0,closeCalls:0,missions:[],sound:true,
+ volume:40,tutorialSeen:false,portalSeen:false,daily:null,history:[],milestones:[]
+};
+
+let save;
+try {
+ save={...BASE,...JSON.parse(localStorage.getItem("bbTemple")||"{}")};
+} catch(e) {
+ save={...BASE};
+}
+
+save.seals=Array.isArray(save.seals)?save.seals:[];
+save.owned=Array.isArray(save.owned)?save.owned:["classic"];
+save.secrets=Array.isArray(save.secrets)?save.secrets:[];
+save.missions=Array.isArray(save.missions)?save.missions:[];
+save.history=Array.isArray(save.history)?save.history:[];
+save.milestones=Array.isArray(save.milestones)?save.milestones:[];
+
+let screen="home",running=false,paused=false,ended=false,raf=0,last=0;
+let mode="level",level=1,sceneFrame=0,worldDistance=0,runCoins=0;
+let darkWorld=false,portalResolved=false,portalDistance=0,darkWorldEndDistance=0;
+let speed=5,lane=1,targetLane=1,jumpY=0,jumpV=0,slideT=0;
+let objects=[],particles=[],spawnClock=0,turns=[],activeTurn=null;
+let shieldT=0,magnetT=0,boostT=0,graceT=0,chase=0,near=0,cameraShake=0;
+let powerStock={shield:0,magnet:0,boost:0};
+let audio=null,lastWarning="",lastSpawnType="",tutorialStage=0;
+let dailyDistanceMark=0,runStartCloseCalls=0;
+
+const outfits=[
+ {id:"classic",name:"Temple Rookie",emoji:"🟡",price:0,desc:"The original explorer."},
+ {id:"pink",name:"Pink Phantom",emoji:"🩷",price:100,desc:"A bright new look."},
+ {id:"blue",name:"Ice Explorer",emoji:"🧊",price:180,desc:"Cold style, quick feet."},
+ {id:"shadow",name:"Shadow Agent",emoji:"🥷",price:300,desc:"A mysterious midnight outfit."},
+ {id:"gold",name:"Golden Guardian",emoji:"👑",price:500,desc:"An outfit worthy of a legend."},
+ {id:"cosmic",name:"Cosmic Visitor",emoji:"👽",secret:"cosmic",desc:"An unexpected visitor."},
+ {id:"ghost",name:"Temple Phantom",emoji:"👻",secret:"ghost",desc:"Only the farthest runners discover this."},
+ {id:"seal",name:"Seal Keeper",emoji:"🏵️",secret:"seal",desc:"A tribute to temple mastery."}
+];
+
+const achievements=[
+ {id:"cosmic",name:"Banana Collector",icon:"🛸",desc:"Collect 50 bananas in total.",test:()=>save.totalBananas>=50},
+ {id:"ghost",name:"The Long Road",icon:"👻",desc:"Travel 1,000 meters in a single endless run.",test:()=>save.longest>=1000},
+ {id:"turner",name:"Path Finder",icon:"↪️",desc:"Complete five turns.",test:()=>save.turns>=5},
+ {id:"seal",name:"Seal Keeper",icon:"🏵️",desc:"Collect three temple seals.",test:()=>save.seals.length>=3},
+ {id:"jumper",name:"Sky Walker",icon:"🌠",desc:"Perform 25 jumps.",test:()=>save.jumps>=25},
+ {id:"survivor",name:"Unstoppable",icon:"🔥",desc:"Finish a level without being hit.",test:()=>save.missions.includes("clean")}
+];
+
+const dailyCatalog=[
+ {type:"banana",icon:"🍌",name:"Fruitful expedition",verb:"Collect bananas",targets:[12,18,24],reward:35},
+ {type:"distance",icon:"📏",name:"Long-distance route",verb:"Travel meters",targets:[250,350,500],reward:45},
+ {type:"jump",icon:"⬆️",name:"Clear the stones",verb:"Jump over hazards",targets:[4,7,10],reward:35},
+ {type:"slide",icon:"⬇️",name:"Keep a low profile",verb:"Slide beneath traps",targets:[3,5,8],reward:35},
+ {type:"turn",icon:"↪️",name:"Follow the old road",verb:"Complete turns",targets:[1,2,3],reward:55},
+ {type:"level",icon:"🏛️",name:"Temple graduate",verb:"Complete a level",targets:[1,1,1],reward:70}
+];
+
+const milestoneCatalog=[
+ {id:"harvest-1",icon:"🍌",name:"First harvest",detail:"Collect 100 bananas over all expeditions.",target:100,reward:80,value:()=>save.totalBananas},
+ {id:"harvest-2",icon:"🍌",name:"Banana baron",detail:"Build a lifetime collection of 500 bananas.",target:500,reward:220,value:()=>save.totalBananas},
+ {id:"runner-1",icon:"🏃",name:"Temple regular",detail:"Start 10 expeditions of any kind.",target:10,reward:90,value:()=>save.totalRuns},
+ {id:"runner-2",icon:"🏃",name:"Road veteran",detail:"Start 50 expeditions of any kind.",target:50,reward:250,value:()=>save.totalRuns},
+ {id:"scholar-1",icon:"🏛️",name:"First chapter",detail:"Complete five temple levels.",target:5,reward:100,value:()=>save.completed},
+ {id:"scholar-2",icon:"🏆",name:"Temple legend",detail:"Complete all 30 temple levels.",target:30,reward:500,value:()=>save.completed},
+ {id:"seal-collector",icon:"🏵️",name:"Golden collection",detail:"Collect three temple seals.",target:3,reward:140,value:()=>save.seals.length},
+ {id:"sky-steps",icon:"⬆️",name:"Cloud jumper",detail:"Perform 100 jumps during your adventures.",target:100,reward:120,value:()=>save.jumps},
+ {id:"far-runner",icon:"📏",name:"Beyond the horizon",detail:"Reach a 1,000 meter personal record.",target:1000,reward:180,value:()=>save.best},
+ {id:"wardrobe",icon:"🧥",name:"Costume collector",detail:"Own five different costumes.",target:5,reward:160,value:()=>save.owned.length}
+];
+
+function dateStamp(date=new Date()){
+ return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
+}
+
+function dailySeed(text){
+ let n=2166136261;
+ for(let i=0;i<text.length;i++)n=Math.imul(n^text.charCodeAt(i),16777619);
+ return n>>>0;
+}
+
+function dailyEnsure(){
+ const today=dateStamp();
+ if(save.daily&&save.daily.date===today&&Array.isArray(save.daily.tasks))return;
+ let seed=dailySeed(today),pool=dailyCatalog.slice(),tasks=[];
+ const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};
+ for(let i=0;i<3;i++){
+  let at=Math.floor(random()*pool.length),spec=pool.splice(at,1)[0];
+  let tier=Math.floor(random()*spec.targets.length);
+  tasks.push({type:spec.type,target:spec.targets[tier],progress:0,claimed:false});
+ }
+ save.daily={date:today,tasks};
+}
+
+function dailySpec(type){return dailyCatalog.find(x=>x.type===type)}
+function dailyTaskDone(task){return task.progress>=task.target}
+
+function dailyProgress(type,amount=1,durable=true){
+ dailyEnsure();
+ let changed=false;
+ for(const task of save.daily.tasks){
+  if(task.type!==type||dailyTaskDone(task))continue;
+  task.progress=Math.min(task.target,task.progress+amount);
+  changed=true;
+ }
+ if(!changed)return;
+ if(durable){
+  try{localStorage.setItem("bbTemple",JSON.stringify(save))}catch(e){}
+ }
+ if(screen==="journal")renderDaily();
+}
+
+function renderDaily(){
+ dailyEnsure();
+ const grid=$("dailygrid");
+ if(!grid)return;
+ $("dailyDate").textContent=`Today's contracts · ${save.daily.date} · progress is saved in this browser.`;
+ let available=0;
+ grid.innerHTML="";
+ save.daily.tasks.forEach((task,index)=>{
+  const spec=dailySpec(task.type),done=dailyTaskDone(task);
+  available+=spec.reward;
+  const percent=Math.min(100,task.progress/task.target*100);
+  const card=document.createElement("div");
+  card.className="contract"+(done?" done":"");
+  const shown=task.type==="distance"?Math.floor(task.progress):Math.min(task.target,Math.floor(task.progress));
+  card.innerHTML=`<div class="row"><div class="contract-icon">${spec.icon}</div><span class="tag">${done?"COMPLETE":"DAILY CONTRACT"}</span></div><h3>${spec.name}</h3><p>${spec.verb}: <b>${shown} / ${task.target}</b></p><div class="progress"><div style="width:${percent}%"></div></div><div class="row"><span class="muted">Reward: ${spec.reward} 🍌</span><button class="${done&&!task.claimed?"goldbtn":"secondary"}" ${!done||task.claimed?"disabled":""} data-claim="${index}">${task.claimed?"✓ CLAIMED":done?"CLAIM REWARD":"IN PROGRESS"}</button></div>`;
+  grid.appendChild(card);
+ });
+ $("dailyRewardLabel").textContent=`CONTRACTS: ${save.daily.tasks.filter(dailyTaskDone).length}/3 · REWARDS: ${available} 🍌`;
+ grid.querySelectorAll("[data-claim]").forEach(button=>button.addEventListener("click",()=>claimDaily(+button.dataset.claim)));
+}
+
+function claimDaily(index){
+ dailyEnsure();
+ const task=save.daily.tasks[index];
+ if(!task||task.claimed||!dailyTaskDone(task))return;
+ task.claimed=true;
+ save.coins+=dailySpec(task.type).reward;
+ persist();
+ beep(760,.12);
+}
+
+function milestoneReady(milestone){return milestone.value()>=milestone.target}
+
+function renderMilestones(){
+ const grid=$("milestoneGrid");
+ if(!grid)return;
+ grid.innerHTML="";
+ milestoneCatalog.forEach(milestone=>{
+  const value=Math.max(0,milestone.value()),done=milestoneReady(milestone);
+  const claimed=save.milestones.includes(milestone.id);
+  const percentage=Math.min(100,value/milestone.target*100);
+  const card=document.createElement("article");
+  card.className="contract"+(done?" done":"");
+  card.innerHTML=`<div class="row"><div class="contract-icon">${milestone.icon}</div><span class="tag">${claimed?"REWARD CLAIMED":done?"READY TO CLAIM":"MILESTONE"}</span></div><h3>${milestone.name}</h3><p>${milestone.detail}</p><div class="progress"><div style="width:${percentage}%"></div></div><div class="row"><span class="muted">${Math.min(value,milestone.target)} / ${milestone.target} · Reward ${milestone.reward} 🍌</span><button class="${done&&!claimed?"goldbtn":"secondary"}" ${!done||claimed?"disabled":""} data-milestone="${milestone.id}">${claimed?"✓ CLAIMED":done?"CLAIM REWARD":"IN PROGRESS"}</button></div>`;
+  grid.appendChild(card);
+ });
+ grid.querySelectorAll("[data-milestone]").forEach(button=>button.addEventListener("click",()=>claimMilestone(button.dataset.milestone)));
+}
+
+function claimMilestone(id){
+ const milestone=milestoneCatalog.find(item=>item.id===id);
+ if(!milestone||!milestoneReady(milestone)||save.milestones.includes(id))return;
+ save.milestones.push(id);
+ save.coins+=milestone.reward;
+ persist();
+ beep(820,.14);
+}
+
+function renderJournal(){
+ renderMilestones();
+ const grid=$("journalStats");
+ if(!grid)return;
+ const stats=[
+  ["🍌","Lifetime bananas",save.totalBananas],
+  ["🏛️","Temple levels",`${save.completed} / 30`],
+  ["🏵️","Seals collected",`${save.seals.length} / 10`],
+  ["📏","Best endless run",`${save.best} m`],
+  ["🧭","Farthest expedition",`${save.longest} m`],
+  ["🎮","Runs started",save.totalRuns],
+  ["↪️","Turns completed",save.turns],
+  ["⬆️","Jumps performed",save.jumps],
+  ["⬇️","Slides performed",save.slides],
+  ["💥","Close calls",save.closeCalls],
+  ["🔐","Secrets discovered",`${save.secrets.length} / ${achievements.length}`],
+  ["🧥","Costumes owned",`${save.owned.length} / ${outfits.length}`]
+ ];
+ grid.innerHTML=stats.map(([icon,label,value])=>`<div class="journal-stat"><span>${icon} ${label}</span><b>${value}</b></div>`).join("");
+ renderDaily();
+ renderCodex();
+ renderHistory();
+}
+
+const codexEntries=[
+ {icon:"🍌",name:"Golden banana",kind:"TREASURE",detail:"Adds one banana to your current run and your lifetime collection.",tip:"The road's main currency. Magnet power-ups gather bananas in their radius."},
+ {icon:"🪙",name:"Temple seal",kind:"RARE TREASURE",detail:"A rare road pickup adds five bananas. Completing a seal level also grants its milestone seal.",tip:"Seal pickups are valuable, but never risk a collision to reach one."},
+ {icon:"🪨",name:"Broken barrier",kind:"JUMP",detail:"A low stone obstruction crossing the lane.",tip:"Jump as it approaches. Keep the jump held long enough for the hazard to pass."},
+ {icon:"🪧",name:"Hanging trap",kind:"SLIDE",detail:"A low overhead sign marked DUCK! blocks the standing path.",tip:"Slide beneath it. A lane change is another safe option if started early."},
+ {icon:"📦",name:"Supply crate",kind:"DODGE",detail:"A solid crate occupying the center of a lane.",tip:"Move to a clear lane or jump over it before reaching the foreground."},
+ {icon:"🕳️",name:"Collapsed floor",kind:"JUMP",detail:"A dark gap in the path where the stones have fallen away.",tip:"Jump over the gap. The jump must already be active as you pass it."},
+ {icon:"🛡️",name:"Guardian shield",kind:"POWER-UP",detail:"Absorbs one collision and briefly protects against another immediate hit.",tip:"Collect it before a difficult section; it does not prevent missed-turn penalties."},
+ {icon:"🧲",name:"Banana magnet",kind:"POWER-UP",detail:"Pulls bananas toward your lane for a limited time.",tip:"Use the active window to collect more safely without crossing into hazards."},
+ {icon:"⚡",name:"Lightning boost",kind:"POWER-UP",detail:"Temporarily increases running speed.",tip:"The faster pace also means hazards approach sooner. Stay alert while boosted."},
+ {icon:"↪️",name:"Temple junction",kind:"NAVIGATION",detail:"A marked turn that requires a quick decision before the gate.",tip:"Follow the arrow with TURN or swipe in the indicated direction when warned."}
+];
+
+function renderCodex(){
+ const grid=$("codexGrid");
+ if(!grid)return;
+ grid.innerHTML=codexEntries.map(entry=>`<article class="tile"><div class="row"><div class="bigicon">${entry.icon}</div><span class="tag">${entry.kind}</span></div><h3>${entry.name}</h3><p>${entry.detail}</p><p class="muted" style="margin-bottom:0"><b>Field advice:</b> ${entry.tip}</p></article>`).join("");
+}
+
+function renderHistory(){
+ const grid=$("historyGrid");
+ if(!grid)return;
+ if(!save.history.length){
+  grid.innerHTML='<div class="tile"><b>No expedition records yet</b><p class="muted" style="margin:8px 0 0">Complete or end a run and its distance, haul, and outcome will be recorded here.</p></div>';
+  return;
+ }
+ grid.innerHTML=save.history.slice(0,12).map(run=>{
+  const modeName=run.mode==="free"?"Endless":run.mode==="tutorial"?"Training":`Level ${run.level}`;
+  const result=run.won?"SUCCESS":"ENDED";
+  const timestamp=Number.isFinite(run.time)?new Date(run.time).toLocaleString():"Recorded expedition";
+  return `<article class="tile"><div class="row"><span class="tag">${result}</span><span class="muted" style="font-size:11px">${timestamp}</span></div><h3 style="margin-top:12px">${modeName}</h3><p>📏 ${run.distance} m &nbsp; · &nbsp; 🍌 ${run.bananas} &nbsp; · &nbsp; 💥 ${run.hits} close calls</p></article>`;
+ }).join("");
+}
+
+function recordRun(won){
+ const entry={
+  time:Date.now(),mode,level,
+  distance:Math.floor(worldDistance),
+  bananas:runCoins,
+  hits:Math.max(0,save.closeCalls-runStartCloseCalls),
+  won:!!won
+ };
+ save.history.unshift(entry);
+ save.history=save.history.slice(0,12);
+}
+
+function persist(){
+ try{localStorage.setItem("bbTemple",JSON.stringify(save))}catch(e){}
+ updateAll();
+}
+
+function theme(t){
+ save.theme=t;
+ let p=palettes[t]||palettes.purple;
+ document.documentElement.style.setProperty("--a",p[0]);
+ document.documentElement.style.setProperty("--b",p[1]);
+ document.documentElement.style.setProperty("--bg",p[2]);
+ persist();
+ beep(500,.06);
+}
+
+function saveSettings(){
+ save.sound=$("soundEnabled").checked;
+ save.volume=+$("volume").value;
+ save.difficulty=$("difficulty").value;
+ persist();
+}
+
+function updateAll(){
+ $("bank").textContent=save.coins;
+ $("sealbank").textContent=save.seals.length;
+ $("progressLabel").textContent=`Level ${Math.min(30,save.completed+1)} / 30`;
+ $("progressBar").style.width=(save.completed/30*100)+"%";
+ $("homeQuest").textContent=`Lifetime bananas: ${save.totalBananas} · Best endless run: ${save.best} m · Seals: ${save.seals.length}/10`;
+ $("levelSummary").textContent=`${save.completed} / 30 complete`;
+ if(screen==="journal")renderJournal();
+}
+
+function show(id){
+ running=false;
+ paused=false;
+ cancelAnimationFrame(raf);
+ screen=id;
+ document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+ $(id).classList.add("active");
+ if(id==="levels")renderLevels();
+ if(id==="shop")renderShop();
+ if(id==="secrets")renderSecrets();
+ updateAll();
+}
+
+function nextLevel(){return Math.min(30,save.completed+1)}
+
+function renderLevels(){
+ let g=$("levelgrid");
+ g.innerHTML="";
+ for(let n=1;n<=30;n++){
+  let b=document.createElement("button");
+  b.className="level "+(n<=save.completed?"done":n===nextLevel()?"current":"");
+  if(n%3===0)b.classList.add("seallevel");
+  b.textContent=n<=save.completed?"✓":n>save.completed+1?"🔒":n;
+  b.disabled=n>save.completed+1;
+  b.title=n%3===0?"Seal reward level":"Level "+n;
+  b.onclick=()=>begin("level",n);
+  g.appendChild(b);
+ }
+
+ let sg=$("sealgrid");
+ sg.innerHTML="";
+ for(let n=3;n<=30;n+=3){
+  let d=document.createElement("div");
+  d.className="tile";
+  d.innerHTML=`<div class="row"><div class="seal ${save.seals.includes(n)?"":"locked"}">${save.seals.includes(n)?"🏵️":"🔒"}</div><div><b>Seal ${n/3}</b><p class="muted" style="margin:6px 0">${save.seals.includes(n)?"Collected":"Complete level "+n}</p></div></div>`;
+  sg.appendChild(d);
+ }
+}
+
+function renderShop(){
+ let g=$("shopgrid");
+ g.innerHTML="";
+ outfits.forEach(o=>{
+  let unlocked=save.owned.includes(o.id)||(o.secret&&save.secrets.includes(o.secret));
+  let d=document.createElement("div");
+  d.className="tile";
+  d.innerHTML=`<div class="bigicon">${o.emoji}</div><h3>${o.name}</h3><p>${o.desc}</p><p>${unlocked?"UNLOCKED":o.secret?"🔒 Hidden reward":"🍌 "+o.price+" bananas"}</p>`;
+  let b=document.createElement("button");
+  b.textContent=save.costume===o.id?"✓ EQUIPPED":unlocked?"EQUIP":o.secret?"SECRET":"UNLOCK";
+  b.disabled=!unlocked&&!!o.secret;
+  b.onclick=()=>{
+   if(unlocked)save.costume=o.id;
+   else if(save.coins>=o.price){
+    save.coins-=o.price;
+    save.owned.push(o.id);
+    save.costume=o.id;
+   } else {
+    alert("You need "+(o.price-save.coins)+" more bananas.");
+    return;
+   }
+   persist();
+   renderShop();
+   beep(700,.1);
+  };
+  d.appendChild(b);
+  g.appendChild(d);
+ });
+}
+
+function renderSecrets(){
+ let g=$("secretgrid");
+ g.innerHTML="";
+ achievements.forEach(a=>{
+  let yes=save.secrets.includes(a.id);
+  let d=document.createElement("div");
+  d.className="tile";
+  d.innerHTML=`<div class="bigicon">${yes?a.icon:"🔒"}</div><h3>${yes?a.name:"Unknown discovery"}</h3><p>${a.desc}</p><b>${yes?"✓ DISCOVERED":"HIDDEN"}</b>`;
+  g.appendChild(d);
+ });
+}
+
+function checkSecrets(){
+ for(let a of achievements){
+  if(!save.secrets.includes(a.id)&&a.test()){
+   save.secrets.push(a.id);
+   if(["cosmic","ghost","seal"].includes(a.id)){
+    let id={cosmic:"cosmic",ghost:"ghost",seal:"seal"}[a.id];
+    if(!save.owned.includes(id))save.owned.push(id);
+   }
+   announce("SECRET FOUND: "+a.name+"!");
+  }
+ }
+}
+
+function resetSave(){
+ if(!confirm("Erase all progress? This cannot be undone."))return;
+ try{localStorage.removeItem("bbTemple")}catch(e){}
+ save={...BASE,seals:[],owned:["classic"],secrets:[],missions:[]};
+ theme("purple");
+ persist();
+ show("home");
+}
+
+function beep(freq=500,dur=.07){
+ if(!save.sound||save.volume===0)return;
+ try{
+  audio=audio||new(window.AudioContext||window.webkitAudioContext)();
+  if(audio.state==="suspended")audio.resume();
+  let o=audio.createOscillator(),g=audio.createGain();
+  o.frequency.value=freq;
+  o.type="sine";
+  g.gain.setValueAtTime(save.volume/100*.09,audio.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+dur);
+  o.connect(g);
+  g.connect(audio.destination);
+  o.start();
+  o.stop(audio.currentTime+dur);
+ }catch(e){}
+}
+
+function announce(text){
+ $("banner").textContent=text;
+ lastWarning=text;
+}
+
+function begin(m="level",n=nextLevel()){
+ mode=m;
+ level=Math.max(1,Math.min(30,n));
+ screen="game";
+ show("game");
+ screen="game";
+ $("gametitle").textContent=m==="free"?"♾️ ENDLESS TEMPLE":m==="tutorial"?"🎓 TRAINING EXPEDITION":"🏛️ TEMPLE LEVEL "+level;
+ $("objective").textContent=m==="free"?"Survive as long as possible.":m==="tutorial"?"Collect 8 bananas and learn to dodge.":`Collect ${targetBananas()} bananas and reach the exit.`;
+ $("overlay").classList.remove("show");
+ lane=1;targetLane=1;jumpY=0;jumpV=0;slideT=0;
+ shieldT=0;magnetT=0;boostT=0;graceT=0;
+ powerStock={shield:0,magnet:0,boost:0};
+ worldDistance=0;runCoins=0;objects=[];particles=[];turns=[];activeTurn=null;
+ darkWorld=false;portalResolved=false;darkWorldEndDistance=0;
+ portalDistance=m==="level"?targetDistance()*(.38+Math.random()*.28):m==="free"?180+Math.random()*150:Infinity;
+ spawnClock=30;sceneFrame=0;near=0;chase=0;
+ ended=false;paused=false;running=true;cameraShake=0;
+ updatePowerDock();
+ speed=baseSpeed();
+ last=performance.now();
+ save.totalRuns++;
+ runStartCloseCalls=save.closeCalls;
+ save.missions=save.missions.filter(x=>x!=="clean");
+ $("runstatus").textContent="Expedition in progress";
+ $("runbar").style.width="0%";
+ if(m==="tutorial"){tutorialStage=0;announce("TRAINING: move between lanes!")}
+ else announce("THE TEMPLE IS WATCHING...");
+ $("powerhud").textContent="NONE";
+ raf=requestAnimationFrame(loop);
+}
+
+function baseSpeed(){
+ return 5+(save.difficulty==="chill"?-1:save.difficulty==="chaos"?1.8:0)+level*.08;
+}
+
+function targetBananas(){return mode==="tutorial"?8:8+level*2}
+function targetDistance(){return 300+level*35}
+
+function act(a){
+ if(!running||paused)return;
+ if(a==="left"){targetLane=Math.max(0,targetLane-1);beep(320,.035)}
+ if(a==="right"){targetLane=Math.min(2,targetLane+1);beep(360,.035)}
+ if(a==="jump"&&jumpY<=0&&slideT<=0){jumpV=12;jumpY=1;save.jumps++;dailyProgress("jump");beep(650,.06)}
+ if(a==="slide"&&jumpY<=0){slideT=32;save.slides++;dailyProgress("slide");beep(260,.06)}
+ if(a==="turn")turnNow();
+}
+
+function pause(){
+ if(!running)return;
+ paused=true;
+ updatePowerDock();
+ overlay("⏸️","EXPEDITION PAUSED","The temple will wait. Your run resumes when you are ready.","RESUME",resume);
+}
+
+function resume(){
+ if(ended)return;
+ paused=false;
+ updatePowerDock();
+ $("overlay").classList.remove("show");
+ last=performance.now();
+ raf=requestAnimationFrame(loop);
+}
+
+function exitRun(){
+ running=false;
+ paused=false;
+ cancelAnimationFrame(raf);
+ show("home");
+}
+
+function overlay(icon,title,txt,button,fn){
+ $("ovicon").textContent=icon;
+ $("ovtitle").textContent=title;
+ $("ovtext").innerHTML=txt;
+ $("ovmain").textContent=button;
+ $("ovmain").onclick=fn;
+ $("ovalt").style.display="none";
+ $("overlay").classList.add("show");
+}
+
+function openPortalChoice(){
+ paused=true;
+ updatePowerDock();
+ const firstVisit=!save.portalSeen;
+ const endless=mode==="free";
+ const description=firstVisit?
+  (endless?
+   "A rift has opened on the endless road. Enter the shadow world for a while, or stay on the bright path. In Endless, the portal will return you to the bright world after a short journey.":
+   "A strange gateway has opened along the temple route. Step through to finish the expedition in a shadowy mirror-world, or keep to the bright temple path."):
+  "Enter the dark world?";
+ save.portalSeen=true;
+ persist();
+ overlay("🌀",firstVisit?"A PORTAL BETWEEN WORLDS":"ENTER THE PORTAL?",description,firstVisit?"ENTER THE DARK WORLD":"YES, ENTER",enterDarkWorld);
+ $("ovalt").textContent=firstVisit?"STAY IN THE BRIGHT WORLD":"NO, STAY HERE";
+ $("ovalt").style.display="inline-block";
+ $("ovalt").onclick=stayInBrightWorld;
+}
+
+function enterDarkWorld(){
+ darkWorld=true;
+ portalResolved=true;
+ if(mode==="free"){
+  darkWorldEndDistance=worldDistance+190+Math.random()*100;
+  $("gametitle").textContent="🌑 ENDLESS SHADOW WORLD";
+ }else $("gametitle").textContent="🌑 SHADOW TEMPLE · LEVEL "+level;
+ paused=false;
+ $("overlay").classList.remove("show");
+ updatePowerDock();
+ announce("PORTAL CROSSED · WELCOME TO THE SHADOW WORLD");
+ beep(180,.3);
+ last=performance.now();
+ raf=requestAnimationFrame(loop);
+}
+
+function stayInBrightWorld(){
+ darkWorld=false;
+ portalResolved=true;
+ if(mode==="free"){
+  portalResolved=false;
+  portalDistance=worldDistance+180+Math.random()*180;
+  $("gametitle").textContent="♾️ ENDLESS TEMPLE";
+ }
+ paused=false;
+ $("overlay").classList.remove("show");
+ updatePowerDock();
+ announce("PORTAL LEFT BEHIND · KEEP RUNNING!");
+ last=performance.now();
+ raf=requestAnimationFrame(loop);
+}
+
+window.addEventListener("keydown",e=>{
+ let k=e.key.toLowerCase();
+ if(["arrowleft","arrowright","arrowup","arrowdown"," "].includes(k))e.preventDefault();
+ if(e.repeat)return;
+ if(k==="a"||k==="arrowleft")act("left");
+ if(k==="d"||k==="arrowright")act("right");
+ if(k==="w"||k==="arrowup"||k===" ")act("jump");
+ if(k==="s"||k==="arrowdown")act("slide");
+ if(k==="1")usePower("shield");
+ if(k==="2")usePower("magnet");
+ if(k==="3")usePower("boost");
+ if(k==="e")act("turn");
+ if(k==="p"||k==="escape"){if(running)(paused?resume():pause())}
+});
+
+let sx=0,sy=0;
+
+cv.addEventListener("touchstart",e=>{
+ sx=e.changedTouches[0].clientX;
+ sy=e.changedTouches[0].clientY;
+},{passive:true});
+
+cv.addEventListener("touchend",e=>{
+ if(!running||paused)return;
+ let dx=e.changedTouches[0].clientX-sx;
+ let dy=e.changedTouches[0].clientY-sy;
+ if(Math.max(Math.abs(dx),Math.abs(dy))<25)return;
+ if(Math.abs(dx)>Math.abs(dy)){
+  if(activeTurn&&activeTurn.warn){turnNow();return}
+  act(dx>0?"right":"left");
+ }else act(dy<0?"jump":"slide");
+},{passive:true});
+
+function laneX(l,y){
+ const p=Math.max(0,Math.min(1,(y-220)/320));
+ return 450+(l-1)*(42+p*118);
+}
+
+function roadY(p){return 130+p*410}
+
+function drawCloud(x,y,s=1){
+ ctx.save();ctx.translate(x,y);ctx.scale(s,s);
+ ctx.fillStyle="#fff8e8d9";
+ ctx.beginPath();ctx.ellipse(0,5,38,14,0,0,Math.PI*2);ctx.ellipse(-18,0,17,16,0,0,Math.PI*2);ctx.ellipse(2,-8,21,21,0,0,Math.PI*2);ctx.ellipse(22,1,18,15,0,0,Math.PI*2);ctx.fill();
+ ctx.restore();
+}
+
+function drawUnicorn(x,y,s=1){
+ ctx.save();ctx.translate(x,y);ctx.scale(s,s);
+ ctx.fillStyle="#fff0ee";ctx.beginPath();ctx.ellipse(0,0,30,17,-.12,0,Math.PI*2);ctx.fill();
+ ctx.beginPath();ctx.ellipse(23,-15,12,15,-.35,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#f7d2c5";ctx.beginPath();ctx.moveTo(28,-28);ctx.lineTo(34,-45);ctx.lineTo(36,-25);ctx.closePath();ctx.fill();
+ ctx.fillStyle="#ffd66f";ctx.beginPath();ctx.moveTo(20,-26);ctx.lineTo(16,-43);ctx.lineTo(28,-28);ctx.closePath();ctx.fill();
+ ctx.fillStyle="#bf83ed";ctx.beginPath();ctx.ellipse(-16,-7,18,9,-.45,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#67d9d0";ctx.beginPath();ctx.ellipse(-19,1,16,7,.4,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle="#f7eee0";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-16,10);ctx.lineTo(-18,25);ctx.moveTo(9,10);ctx.lineTo(11,25);ctx.stroke();
+ ctx.fillStyle="#55425d";ctx.beginPath();ctx.arc(26,-16,1.8,0,Math.PI*2);ctx.fill();
+ ctx.restore();
+}
+
+function drawTempleHelper(x,y,s=1){
+ ctx.save();ctx.translate(x,y);ctx.scale(s,s);
+ ctx.fillStyle="#f7c928";ctx.beginPath();ctx.roundRect(-13,-30,26,42,12);ctx.fill();
+ ctx.fillStyle="#e7b528";ctx.beginPath();ctx.ellipse(0,-29,13,7,0,Math.PI,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#d9e8e8";ctx.beginPath();ctx.ellipse(0,-21,10,7,0,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle="#444b51";ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,-21,10,7,0,0,Math.PI*2);ctx.stroke();
+ ctx.fillStyle="#293640";ctx.beginPath();ctx.arc(-3,-21,1.7,0,Math.PI*2);ctx.arc(3,-21,1.7,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#365a79";ctx.fillRect(-12,-12,24,19);ctx.fillStyle="#f2d277";ctx.fillRect(-4,-8,8,4);
+ ctx.strokeStyle="#e9b72b";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-12,-5);ctx.lineTo(-19,2);ctx.moveTo(12,-5);ctx.lineTo(18,-1);ctx.stroke();
+ ctx.fillStyle="#453a35";ctx.fillRect(-9,7,6,7);ctx.fillRect(3,7,6,7);
+ ctx.restore();
+}
+
+function drawPortal(){
+ const pulse=1+Math.sin(sceneFrame*.09)*.06;
+ ctx.save();ctx.translate(450,330);ctx.scale(pulse,pulse);
+ ctx.fillStyle="#160f28cc";ctx.beginPath();ctx.ellipse(0,24,60,14,0,0,Math.PI*2);ctx.fill();
+ const aura=ctx.createRadialGradient(0,-18,8,0,-18,88);
+ aura.addColorStop(0,"#ff4fd866");aura.addColorStop(.55,"#8d42ff55");aura.addColorStop(1,"#37127400");
+ ctx.fillStyle=aura;ctx.fillRect(-95,-125,190,220);
+ ctx.lineWidth=12;ctx.strokeStyle="#342053";ctx.beginPath();ctx.ellipse(0,-27,43,72,0,0,Math.PI*2);ctx.stroke();
+ ctx.lineWidth=6;ctx.strokeStyle="#dc70ff";ctx.beginPath();ctx.ellipse(0,-27,37,66,0,0,Math.PI*2);ctx.stroke();
+ const core=ctx.createLinearGradient(-25,-90,25,40);core.addColorStop(0,"#35205e");core.addColorStop(.5,"#140e2acc");core.addColorStop(1,"#8c48d9aa");
+ ctx.fillStyle=core;ctx.beginPath();ctx.ellipse(0,-27,33,61,0,0,Math.PI*2);ctx.fill();
+ for(let i=0;i<5;i++){
+  const a=sceneFrame*.035+i*Math.PI*2/5;
+  ctx.fillStyle=i%2?"#ffe782":"#fb9eff";ctx.beginPath();ctx.arc(Math.cos(a)*48,-27+Math.sin(a)*73,3,0,Math.PI*2);ctx.fill();
+ }
+ ctx.restore();
+}
+
+function drawSky(){
+ const palette=palettes[save.theme]||palettes.purple;
+ const sky=ctx.createLinearGradient(0,0,0,540);
+ sky.addColorStop(0,"#152b37");
+ sky.addColorStop(.42,"#54766e");
+ sky.addColorStop(.7,"#d19a61");
+ sky.addColorStop(1,"#342c35");
+ ctx.fillStyle=sky;
+ ctx.fillRect(0,0,900,540);
+
+ // Warm light fading through humid jungle mist.
+ const glow=ctx.createRadialGradient(540,172,8,540,172,340);
+ glow.addColorStop(0,"#ffe6a966");
+ glow.addColorStop(.35,"#f5bb7250");
+ glow.addColorStop(1,"#f5bb7200");
+ ctx.fillStyle=glow;
+ ctx.fillRect(180,0,650,390);
+ ctx.fillStyle="#ffe4a8";
+ ctx.beginPath();ctx.arc(590,145,35,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#fff4c9";
+ ctx.beginPath();ctx.arc(579,134,7,0,Math.PI*2);ctx.fill();
+ drawCloud(135,93,.85+Math.sin(sceneFrame*.012)*.025);
+ drawCloud(760,124,1.05);
+ drawCloud(365,77,.58);
+
+ // Distant ridges and a broken temple silhouette.
+ ctx.fillStyle="#314b4b";
+ ctx.beginPath();ctx.moveTo(0,225);ctx.lineTo(90,165);ctx.lineTo(155,205);ctx.lineTo(260,135);ctx.lineTo(340,206);ctx.lineTo(433,155);ctx.lineTo(527,216);ctx.lineTo(630,153);ctx.lineTo(760,218);ctx.lineTo(845,168);ctx.lineTo(900,205);ctx.lineTo(900,340);ctx.lineTo(0,340);ctx.closePath();ctx.fill();
+ ctx.fillStyle="#3e5c51";
+ ctx.beginPath();ctx.moveTo(0,255);ctx.lineTo(110,202);ctx.lineTo(216,254);ctx.lineTo(338,190);ctx.lineTo(463,257);ctx.lineTo(580,199);ctx.lineTo(704,252);ctx.lineTo(815,192);ctx.lineTo(900,238);ctx.lineTo(900,365);ctx.lineTo(0,365);ctx.closePath();ctx.fill();
+ if(!darkWorld){
+  drawUnicorn(145,222,.66);
+  drawUnicorn(747,226,.58);
+  drawTempleHelper(76,299,.85);
+  drawTempleHelper(831,300,.78);
+ }
+
+ // Ancient gate in the distance, with carved pillars and a glowing opening.
+ ctx.fillStyle="#26383a";ctx.fillRect(359,175,182,109);
+ ctx.fillStyle="#857255";ctx.fillRect(373,189,18,91);ctx.fillRect(509,189,18,91);
+ ctx.fillStyle="#a88c5c";ctx.fillRect(365,179,155,12);ctx.fillRect(379,198,8,69);ctx.fillRect(513,198,8,69);
+ ctx.fillStyle="#e6b771";ctx.fillRect(391,194,118,80);
+ const gate=ctx.createLinearGradient(0,194,0,274);gate.addColorStop(0,"#754d45");gate.addColorStop(1,"#e1a95e");
+ ctx.fillStyle=gate;ctx.beginPath();ctx.moveTo(399,274);ctx.lineTo(399,226);ctx.quadraticCurveTo(450,178,501,226);ctx.lineTo(501,274);ctx.closePath();ctx.fill();
+ ctx.fillStyle="#162a31";ctx.beginPath();ctx.moveTo(417,274);ctx.lineTo(417,232);ctx.quadraticCurveTo(450,203,483,232);ctx.lineTo(483,274);ctx.closePath();ctx.fill();
+
+ // Sparse jungle silhouettes keep the temple and sky clearly visible.
+ for(let layer=0;layer<2;layer++){
+  const ybase=layer===0?273:326;
+  const drift=sceneFrame*(layer===0?.2:.42);
+  ctx.fillStyle=layer===0?"#243c36":"#193129";
+  for(let i=0;i<5;i++){
+   const x=((i*225+drift)%(1125))-110;
+   const h=52+(i%3)*17,w=34+(i%2)*12;
+   ctx.fillRect(x-4,ybase-h*.35,8,h*.65);
+   ctx.beginPath();ctx.ellipse(x,ybase-h,w,h*.52,0,0,Math.PI*2);ctx.fill();
+   ctx.beginPath();ctx.ellipse(x+w*.55,ybase-h*.72,w*.65,h*.34,-.3,0,Math.PI*2);ctx.fill();
+  }
+ }
+ // Fireflies and drifting motes add life without distracting from the route.
+ for(let i=0;i<18;i++){
+  const x=(i*137+sceneFrame*(.35+i%3*.12))%900;
+  const y=170+(i*67%200)+Math.sin(sceneFrame*.035+i)*7;
+  ctx.fillStyle=i%3===0?"#ffe39888":"#d9f4be66";
+  ctx.beginPath();ctx.arc(x,y,i%4===0?2:1.2,0,Math.PI*2);ctx.fill();
+ }
+
+ // Broad stone road with perspective, edge stones, and individual paving slabs.
+ const road=ctx.createLinearGradient(0,170,0,540);
+ road.addColorStop(0,"#85765e");road.addColorStop(.35,"#71634f");road.addColorStop(1,"#423d3b");
+ ctx.fillStyle=road;ctx.beginPath();ctx.moveTo(388,220);ctx.lineTo(512,220);ctx.lineTo(900,540);ctx.lineTo(0,540);ctx.closePath();ctx.fill();
+ ctx.fillStyle="#b49568";ctx.beginPath();ctx.moveTo(388,220);ctx.lineTo(399,220);ctx.lineTo(110,540);ctx.lineTo(61,540);ctx.closePath();ctx.fill();
+ ctx.beginPath();ctx.moveTo(501,220);ctx.lineTo(512,220);ctx.lineTo(839,540);ctx.lineTo(790,540);ctx.closePath();ctx.fill();
+ ctx.strokeStyle="#d1b27e";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(388,220);ctx.lineTo(0,540);ctx.moveTo(512,220);ctx.lineTo(900,540);ctx.stroke();
+
+ // Moving transverse joints make the road feel like a continuous surface.
+ for(let i=0;i<12;i++){
+  const z=((i/12+sceneFrame*speed*.0016)%1),y=220+z*320,half=62+z*388;
+  ctx.strokeStyle=`rgba(35,30,29,${.18+z*.22})`;ctx.lineWidth=.5+z*2.5;
+  ctx.beginPath();ctx.moveTo(450-half,y);ctx.lineTo(450+half,y);ctx.stroke();
+  if(i%2===0&&z>.22){ctx.fillStyle=`rgba(226,202,157,${z*.19})`;ctx.fillRect(450-half*.5,y+2,half*.12,2+z*2);}
+ }
+ // Lane seams are subtle, worn into the stone rather than painted lines.
+ for(let side of [-1,1]){
+  ctx.strokeStyle="#392f2c66";ctx.lineWidth=1.4;
+  ctx.beginPath();ctx.moveTo(450+side*20,220);ctx.lineTo(450+side*150,540);ctx.stroke();
+ }
+ // Stone lanterns along the temple approach.
+ for(let i=0;i<6;i++){
+  const z=((i*.19+sceneFrame*speed*.00085)%1),y=214+z*325;
+  const side=i%2?-1:1,x=450+side*(91+z*380),s=.2+z*.9;
+  ctx.fillStyle="#4c4841";ctx.fillRect(x-9*s,y-32*s,18*s,34*s);
+  ctx.fillStyle="#76664f";ctx.fillRect(x-15*s,y-38*s,30*s,8*s);ctx.fillRect(x-12*s,y-42*s,24*s,5*s);
+  ctx.fillStyle="#ffbf64";ctx.globalAlpha=.45+Math.sin(sceneFrame*.08+i)*.15;ctx.beginPath();ctx.arc(x,y-33*s,5*s,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+ }
+ // Palette glow remains tied to the selected world theme.
+ ctx.globalAlpha=.12;ctx.fillStyle=palette[0];ctx.fillRect(0,0,900,540);ctx.globalAlpha=1;
+ if(darkWorld){
+  ctx.fillStyle="#120d2a99";ctx.fillRect(0,0,900,540);
+  const moon=ctx.createRadialGradient(730,105,5,730,105,80);
+  moon.addColorStop(0,"#ffd2ff");moon.addColorStop(.18,"#df77ff");moon.addColorStop(1,"#963bff00");
+  ctx.fillStyle=moon;ctx.beginPath();ctx.arc(730,105,80,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="#f3c8ff";ctx.beginPath();ctx.arc(730,105,25,0,Math.PI*2);ctx.fill();
+  for(let i=0;i<34;i++){
+   const x=(i*149+sceneFrame*(.25+i%3*.16))%900,y=25+(i*61%190);
+   ctx.fillStyle=i%4===0?"#ff80e8":"#d6c5ff";ctx.globalAlpha=.45+Math.sin(sceneFrame*.05+i)*.3;
+   ctx.beginPath();ctx.arc(x,y,i%5===0?2:1.2,0,Math.PI*2);ctx.fill();
+  }
+  ctx.globalAlpha=1;
+  ctx.fillStyle="#211a35";ctx.beginPath();ctx.moveTo(0,270);ctx.lineTo(75,220);ctx.lineTo(130,270);ctx.lineTo(205,210);ctx.lineTo(280,272);ctx.lineTo(355,225);ctx.lineTo(425,275);ctx.lineTo(520,218);ctx.lineTo(610,273);ctx.lineTo(705,215);ctx.lineTo(790,270);ctx.lineTo(865,220);ctx.lineTo(900,250);ctx.lineTo(900,350);ctx.lineTo(0,350);ctx.closePath();ctx.fill();
+ }
+}
+
+function drawBanana(x,y,s){
+ ctx.save();
+ ctx.translate(x,y);
+ ctx.scale(s,s);
+ ctx.rotate(-.5);
+ ctx.fillStyle="#ffd644";
+ ctx.beginPath();
+ ctx.arc(0,0,13,0,Math.PI*1.45);
+ ctx.arc(0,0,7,Math.PI*1.45,0,true);
+ ctx.fill();
+ ctx.strokeStyle="#a8731d";
+ ctx.lineWidth=2;
+ ctx.stroke();
+ ctx.restore();
+}
+
+function drawCharacter(x,y,scale=1){
+ const id=save.costume;
+ const fur=id==="pink"?"#e97ab6":id==="blue"?"#73c5e8":id==="shadow"?"#4a414c":id==="gold"?"#f2c44c":id==="cosmic"?"#9ae8b3":id==="ghost"?"#d9e5e4":"#bd7b38";
+ const tunic=id==="gold"?"#b77c28":id==="shadow"?"#262533":id==="pink"?"#84395f":id==="blue"?"#2b6486":"#3f5b72";
+ const run=Math.sin(sceneFrame*.34),stride=slideT>0?0:run*7,air=jumpY>0?Math.min(13,jumpY*.6):0;
+ ctx.save();ctx.translate(x,y-air);ctx.scale(scale,scale);
+ if(jumpY<=0){ctx.fillStyle="#181b1b66";ctx.beginPath();ctx.ellipse(0,30,28,7,0,0,Math.PI*2);ctx.fill();}
+ // Back leg and boot animate with the runner's cadence.
+ ctx.strokeStyle="#594237";ctx.lineWidth=9;ctx.lineCap="round";
+ ctx.beginPath();ctx.moveTo(-8,6);ctx.lineTo(-12+stride,22);ctx.lineTo(-18+stride,27);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(8,6);ctx.lineTo(12-stride,22);ctx.lineTo(18-stride,27);ctx.stroke();
+ ctx.fillStyle="#302b2c";ctx.beginPath();ctx.ellipse(-18+stride,28,9,4,-.2,0,Math.PI*2);ctx.ellipse(18-stride,28,9,4,.2,0,Math.PI*2);ctx.fill();
+ // Tail, pack and arms swing opposite the legs.
+ ctx.strokeStyle=fur;ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(-17,-9);ctx.quadraticCurveTo(-36,-3+run*5,-39,-15+run*5);ctx.stroke();
+ ctx.fillStyle="#614532";ctx.beginPath();ctx.roundRect(12,-21,13,25,5);ctx.fill();
+ ctx.fillStyle="#c6a36c";ctx.fillRect(14,-17,9,3);
+ ctx.strokeStyle=fur;ctx.lineWidth=8;
+ ctx.beginPath();ctx.moveTo(-15,-15);ctx.lineTo(-23,-1+run*8);ctx.moveTo(15,-15);ctx.lineTo(23,-1-run*8);ctx.stroke();
+ // Tunic and belt.
+ ctx.fillStyle=tunic;ctx.beginPath();ctx.roundRect(-18,-27,36,39,10);ctx.fill();
+ ctx.fillStyle="#c1a26b";ctx.fillRect(-16,-1,32,5);ctx.fillStyle="#efd07d";ctx.fillRect(-3,-2,6,7);
+ ctx.fillStyle="#6a4935";ctx.fillRect(-14,10,8,4);ctx.fillRect(6,10,8,4);
+ // Expressive monkey-like face and ears.
+ ctx.fillStyle=fur;ctx.beginPath();ctx.ellipse(0,-39,21,23,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#dfb987";ctx.beginPath();ctx.ellipse(0,-33,15,11,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle=fur;ctx.beginPath();ctx.ellipse(-19,-40,7,9,0,0,Math.PI*2);ctx.ellipse(19,-40,7,9,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#f2d6a2";ctx.beginPath();ctx.arc(-19,-40,3.5,0,Math.PI*2);ctx.arc(19,-40,3.5,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#fff";ctx.beginPath();ctx.ellipse(-7,-43,5,7,0,0,Math.PI*2);ctx.ellipse(7,-43,5,7,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#263039";ctx.beginPath();ctx.arc(-6,-42,2.6,0,Math.PI*2);ctx.arc(8,-42,2.6,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#45312d";ctx.beginPath();ctx.ellipse(0,-32,4,2.4,0,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle="#754739";ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(-5,-27);ctx.quadraticCurveTo(0,-24,5,-27);ctx.stroke();
+ if(id==="gold"){ctx.fillStyle="#ffe68b";ctx.beginPath();ctx.moveTo(-11,-57);ctx.lineTo(-6,-68);ctx.lineTo(0,-58);ctx.lineTo(6,-68);ctx.lineTo(12,-57);ctx.closePath();ctx.fill();}
+ if(shieldT>0){ctx.strokeStyle="#76efffbb";ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(0,-12,39,52,0,0,Math.PI*2);ctx.stroke();ctx.strokeStyle="#e6ffff88";ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(0,-12,34,47,0,0,Math.PI*2);ctx.stroke();}
+ ctx.restore();
+}
+
+function drawMonster(){
+ const x=laneX(lane,500),y=479+Math.sin(sceneFrame*.18)*4;
+ ctx.save();ctx.translate(x,y);
+ ctx.fillStyle="#17191a66";ctx.beginPath();ctx.ellipse(0,9,47,11,0,0,Math.PI*2);ctx.fill();
+ // A heavy, shadowy temple guardian gaining ground behind the runner.
+ ctx.fillStyle="#252321";ctx.beginPath();ctx.ellipse(0,-5,35,39,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#3b332b";ctx.beginPath();ctx.ellipse(0,-31,28,27,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#b84f37";ctx.beginPath();ctx.ellipse(-10,-34,4,6,0,0,Math.PI*2);ctx.ellipse(10,-34,4,6,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#f2d8a4";ctx.beginPath();ctx.moveTo(-16,-17);ctx.lineTo(-11,-7);ctx.lineTo(-6,-17);ctx.moveTo(-4,-18);ctx.lineTo(1,-7);ctx.lineTo(6,-18);ctx.moveTo(8,-17);ctx.lineTo(13,-7);ctx.lineTo(18,-17);ctx.fill();
+ ctx.strokeStyle="#221e1b";ctx.lineWidth=9;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(-25,-4);ctx.lineTo(-38,14);ctx.moveTo(25,-4);ctx.lineTo(38,14);ctx.stroke();
+ ctx.fillStyle="#9b7146";ctx.beginPath();ctx.arc(-22,-51,6,0,Math.PI*2);ctx.arc(22,-51,6,0,Math.PI*2);ctx.fill();
+ ctx.restore();
+}
+
+function drawObstacle(o){
+ const z=Math.max(.12,Math.min(1,(o.y-100)/430));
+ const x=laneX(o.lane,o.y),s=.24+z*1.08;
+ ctx.save();ctx.translate(x,o.y);ctx.scale(s,s);
+ if(o.type==="banana"||o.type==="seal"||["shield","magnet","boost"].includes(o.type)){
+  const bob=Math.sin(sceneFrame*.14+o.y*.025)*4;
+  ctx.translate(0,bob);
+  ctx.globalAlpha=.28;ctx.fillStyle=o.type==="banana"||o.type==="seal"?"#ffd85c":o.type==="shield"?"#63ecff":o.type==="magnet"?"#ff79cd":"#ffd260";
+  ctx.beginPath();ctx.ellipse(0,0,25,30,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+ }
+ if(o.type==="banana")drawBanana(0,0,1.15);
+ if(o.type==="seal"){
+  const glow=ctx.createRadialGradient(0,0,4,0,0,27);glow.addColorStop(0,"#fff8bd");glow.addColorStop(.55,"#efbd48");glow.addColorStop(1,"#9b622b");ctx.fillStyle=glow;
+  ctx.beginPath();ctx.arc(0,0,20,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#fff0a1";ctx.lineWidth=3;ctx.stroke();
+  ctx.fillStyle="#76501f";ctx.font="bold 17px Georgia";ctx.textAlign="center";ctx.fillText("✦",0,6);
+ }
+ if(o.type==="crate"){
+  ctx.fillStyle="#2b2925";ctx.fillRect(-23,-20,46,43);ctx.fillStyle="#87613c";ctx.fillRect(-20,-23,40,40);
+  ctx.strokeStyle="#c39b65";ctx.lineWidth=4;ctx.strokeRect(-20,-23,40,40);
+  ctx.strokeStyle="#543b2e";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(-17,-18);ctx.lineTo(17,12);ctx.moveTo(17,-18);ctx.lineTo(-17,12);ctx.stroke();
+  ctx.fillStyle="#e2bd7d";ctx.fillRect(-3,-20,6,35);
+ }
+ if(o.type==="barrier"){
+  ctx.fillStyle="#574c3e";ctx.fillRect(-38,-8,76,26);ctx.fillStyle="#a98252";ctx.fillRect(-39,-16,78,10);
+  ctx.fillStyle="#dbbd87";for(let i=-30;i<34;i+=20){ctx.beginPath();ctx.moveTo(i,-16);ctx.lineTo(i+9,-16);ctx.lineTo(i-2,8);ctx.lineTo(i-11,8);ctx.closePath();ctx.fill();}
+  ctx.fillStyle="#6f5840";ctx.fillRect(-35,18,9,7);ctx.fillRect(26,18,9,7);
+ }
+ if(o.type==="sign"){
+  ctx.strokeStyle="#382d27";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(-30,-19);ctx.lineTo(30,-19);ctx.moveTo(-24,-19);ctx.lineTo(-24,32);ctx.moveTo(24,-19);ctx.lineTo(24,32);ctx.stroke();
+  ctx.fillStyle="#b28b56";ctx.fillRect(-35,-36,70,22);ctx.fillStyle="#e7cc92";ctx.strokeStyle="#60452f";ctx.lineWidth=2;ctx.strokeRect(-35,-36,70,22);
+  ctx.fillStyle="#51382a";ctx.font="bold 12px Arial";ctx.textAlign="center";ctx.fillText("DUCK",0,-20);
+ }
+ if(o.type==="gap"){
+  ctx.fillStyle="#332e2b";ctx.beginPath();ctx.ellipse(0,3,42,17,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#11191a";ctx.beginPath();ctx.ellipse(0,0,35,12,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle="#c3a273";ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(0,0,39,15,0,0,Math.PI*2);ctx.stroke();ctx.strokeStyle="#554839";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-13,1);ctx.lineTo(-4,9);ctx.moveTo(11,-2);ctx.lineTo(20,5);ctx.stroke();
+ }
+ if(["shield","magnet","boost"].includes(o.type)){
+  const color=o.type==="shield"?"#59e4df":o.type==="magnet"?"#ee76cf":"#ffd15f";
+  ctx.fillStyle="#19343a";ctx.strokeStyle=color;ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,18,0,Math.PI*2);ctx.fill();ctx.stroke();
+  ctx.fillStyle=color;ctx.font="bold 19px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(o.type==="shield"?"✧":o.type==="magnet"?"U":"⚡",0,1);ctx.textBaseline="alphabetic";
+ }
+ if(o.type==="turn"){
+  ctx.fillStyle="#604d37";ctx.fillRect(-4,-45,8,52);ctx.fillStyle="#e4bd77";ctx.fillRect(-36,-46,72,30);ctx.strokeStyle="#654b30";ctx.lineWidth=3;ctx.strokeRect(-36,-46,72,30);
+  ctx.fillStyle="#45352a";ctx.font="bold 26px Arial";ctx.textAlign="center";ctx.fillText(o.dir<0?"←":"→",0,-23);
+ }
+ ctx.restore();
+}
+
+function spawn(){
+ const r=Math.random();
+ let type;
+ if(mode==="tutorial"&&runCoins<8)type="banana";
+ else if(mode==="tutorial")type=r<.64?"banana":r<.79?"barrier":r<.91?"crate":"sign";
+ else type=r<.29?"banana":r<.405?"crate":r<.50?"barrier":r<.59?"sign":r<.65?"shield":r<.71?"magnet":r<.76?"boost":r<.82?"gap":r<.84?"seal":"banana";
+ let lanePick=Math.floor(Math.random()*3);
+ const difficulty=Math.min(.18,worldDistance/6000);
+ // Form readable, solvable patterns: a blocked lane always leaves a route open.
+ if(type==="crate"||type==="barrier"||type==="sign"||type==="gap"){
+  if(Math.random()<.24+difficulty){
+   const safe=(lanePick+1+Math.floor(Math.random()*2))%3;
+   objects.push({lane:safe,y:70,type:"banana",hit:false});
+  }
+ }
+ if(mode!=="tutorial"&&mode!=="level"&&worldDistance>260&&Math.random()<.022&&!activeTurn){
+  const dir=Math.random()<.5?-1:1;
+  activeTurn={dir,dist:worldDistance+82,done:false,missed:false};
+  type="turn";lanePick=1;
+ }
+ objects.push({lane:lanePick,y:105,type,hit:false,dir:activeTurn&&type==="turn"?activeTurn.dir:0});
+ // Banana trails lead the eye along the route and reward committing to a lane.
+ if(type==="banana"&&Math.random()<.56){
+  for(let i=1;i<=2;i++)objects.push({lane:lanePick,y:105-i*34,type:"banana",hit:false});
+ }else if(Math.random()<.27){
+  const safe=(lanePick+1+Math.floor(Math.random()*2))%3;
+  objects.push({lane:safe,y:61,type:"banana",hit:false});
+ }
+}
+
+function updatePowerDock(){
+ for(const type of ["shield","magnet","boost"]){
+  const button=$("use-"+type),count=$("count-"+type);
+  if(!button||!count)continue;
+  count.textContent=powerStock[type];
+  const active=type==="shield"?shieldT:type==="magnet"?magnetT:boostT;
+  button.classList.toggle("ready",powerStock[type]>0);
+  button.disabled=!running||paused||powerStock[type]===0||active>0;
+  const label=button.querySelector(".powerlabel");
+  label.textContent=active>0?`ACTIVE · ${Math.ceil(active/60)}s`:powerStock[type]>0?`${type.toUpperCase()} · TAP TO USE`:`${type.toUpperCase()} · EMPTY`;
+ }
+}
+
+function usePower(type){
+ if(!running||paused||!Object.prototype.hasOwnProperty.call(powerStock,type)||powerStock[type]<=0)return;
+ const active=type==="shield"?shieldT:type==="magnet"?magnetT:boostT;
+ if(active>0)return;
+ powerStock[type]--;
+ if(type==="shield"){shieldT=600;announce("SHIELD ACTIVATED · ONE HIT BLOCKED");beep(780,.1)}
+ if(type==="magnet"){magnetT=600;announce("MAGNET ACTIVATED · BANANAS PULLED IN");beep(700,.1)}
+ if(type==="boost"){boostT=250;announce("BOOST ACTIVATED · SPEED INCREASED");beep(900,.13)}
+ updatePowerDock();
+}
+
+function turnNow(){
+ if(!activeTurn||activeTurn.done)return;
+ activeTurn.done=true;
+ worldDistance+=18;
+ save.turns++;
+ dailyProgress("turn");
+ targetLane=activeTurn.dir<0?0:2;
+ announce("CLEAN TURN! +18m");
+ beep(800,.1);
+ activeTurn=null;
+}
+
+function hit(){
+ cameraShake=Math.max(cameraShake,8);
+ if(shieldT>0){
+  shieldT=0;
+  graceT=45;
+  chase=Math.max(0,chase-.3);
+  beep(200,.15);
+  announce("SHIELD BROKE!");
+ } else if(graceT<=0){
+  chase+=.48;
+  graceT=35;
+  near++;
+  save.closeCalls++;
+  beep(110,.2);
+  announce("WATCH OUT! THE CHASER IS CLOSER");
+  for(let i=0;i<7;i++){
+   particles.push({
+    x:laneX(lane,470),y:410,
+    vx:Math.random()*8-4,vy:-Math.random()*7,
+    life:25,color:"#ff695f"
+   });
+  }
+ }
+}
+
+/* FIXED BANANA COLLECTION */
+function collect(o){
+ if(o.type==="banana"){
+  runCoins+=1;
+  save.coins+=1;
+  save.totalBananas+=1;
+  dailyProgress("banana",1,false);
+
+  // Update the counters immediately.
+  $("runcoins").textContent=runCoins;
+  $("bank").textContent=save.coins;
+
+  announce("+1 🍌 BANANA!");
+
+  particles.push({
+   x:laneX(o.lane,o.y),
+   y:o.y,
+   vx:0,
+   vy:-3,
+   life:18,
+   color:"#ffdf68"
+  });
+
+  beep(700,.06);
+
+  try{
+   localStorage.setItem("bbTemple",JSON.stringify(save));
+  }catch(e){}
+ }
+
+ if(o.type==="seal"){
+  if(!save.seals.includes(level)){
+   save.seals.push(level);
+   announce("RARE SEAL COLLECTED!");
+  }else{
+   announce("SEAL FOUND!");
+  }
+  save.coins+=5;
+  $("bank").textContent=save.coins;
+  beep(850,.12);
+ }
+
+ if(["shield","magnet","boost"].includes(o.type)){
+  const name=o.type==="shield"?"SHIELD":o.type==="magnet"?"MAGNET":"BOOST";
+  if(powerStock[o.type]<5){
+   powerStock[o.type]++;
+   announce(`${name} STORED · TAP ITS BUTTON WHEN YOU NEED IT`);
+  }else announce(`${name} INVENTORY FULL`);
+  beep(o.type==="boost"?900:o.type==="shield"?780:700,.1);
+  updatePowerDock();
+ }
+}
+
+function loop(now){
+ if(!running||paused)return;
+ const dt=Math.min(1.5,Math.max(.35,(now-last)/16.67||1));
+ last=now;sceneFrame+=dt;
+ const targetSpeed=baseSpeed()+Math.min(3.5,worldDistance/260)+(boostT>0?2.2:0);
+ speed+=(targetSpeed-speed)*(1-Math.exp(-.055*dt));
+ const distanceStep=speed*.075*dt;
+ worldDistance+=distanceStep;
+ dailyProgress("distance",distanceStep,false);
+
+ if(mode==="free"&&darkWorld&&worldDistance>=darkWorldEndDistance){
+  darkWorld=false;
+  portalResolved=false;
+  darkWorldEndDistance=0;
+  portalDistance=worldDistance+200+Math.random()*180;
+  $("gametitle").textContent="♾️ ENDLESS TEMPLE";
+  announce("THE RIFT FADES · BACK TO THE BRIGHT WORLD!");
+ }
+
+ if(jumpY>0){jumpY+=jumpV*dt;jumpV-=.68*dt;if(jumpY<=0){jumpY=0;jumpV=0}}
+ if(slideT>0)slideT=Math.max(0,slideT-dt);
+ if(graceT>0)graceT=Math.max(0,graceT-dt);
+ if(shieldT>0)shieldT=Math.max(0,shieldT-dt);
+ if(magnetT>0)magnetT=Math.max(0,magnetT-dt);
+ if(boostT>0)boostT=Math.max(0,boostT-dt);
+ cameraShake=Math.max(0,cameraShake-.65*dt);
+ // The runner eases between lanes with a slight momentum, not a hard snap.
+ lane+=(targetLane-lane)*(1-Math.exp(-.19*dt));
+ spawnClock-=dt;
+ if(spawnClock<=0){
+  spawn();
+  const pace=Math.max(33,68-worldDistance/125);
+  spawnClock=pace*(.84+Math.random()*.32);
+ }
+
+ ctx.save();
+ ctx.fillStyle="#152b37";ctx.fillRect(0,0,900,540);
+ if(cameraShake>0)ctx.translate((Math.random()-.5)*cameraShake,(Math.random()-.5)*cameraShake*.55);
+ drawSky();
+ if((mode==="level"||mode==="free")&&!darkWorld&&!portalResolved&&worldDistance>=portalDistance-55)drawPortal();
+ if(boostT>0){
+  ctx.save();ctx.globalAlpha=.23;
+  for(let i=0;i<14;i++){
+   const x=(i*83+sceneFrame*7)%900,y=(i*59+sceneFrame*13)%540,len=18+(i%4)*11;
+   ctx.strokeStyle=i%2?"#d9f8ff":"#ffe5a3";ctx.lineWidth=1+(i%3);
+   ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-7,y+len);ctx.stroke();
+  }
+  ctx.restore();
+ }
+
+ if(activeTurn&&!activeTurn.done){
+  const left=activeTurn.dist-worldDistance;
+  if(left<40&&!activeTurn.warn){activeTurn.warn=true;announce("TURN "+(activeTurn.dir<0?"LEFT":"RIGHT")+"! SWIPE OR TAP TURN");beep(450,.12)}
+  if(left<=0&&!activeTurn.done&&!activeTurn.missed){activeTurn.missed=true;hit();activeTurn=null}
+ }
+ chase=Math.max(0,chase-.00035*dt);
+
+ for(let i=objects.length-1;i>=0;i--){
+  const o=objects[i],depth=Math.max(0,Math.min(1,(o.y-105)/455));
+  o.y+=speed*dt*(.72+depth*1.35);
+  if(magnetT>0&&o.type==="banana"&&o.y>220&&o.y<500){
+   const target=Math.round(lane);o.lane+=(target-o.lane)*Math.min(1,.12*dt);
+  }
+  drawObstacle(o);
+  const same=Math.abs(o.lane-lane)<.46,close=o.y>410&&o.y<472;
+  if(!o.hit&&same&&close){
+   o.hit=true;
+   if(o.type==="banana"||o.type==="seal"||["shield","magnet","boost"].includes(o.type))collect(o);
+   else if(o.type==="turn"){if(activeTurn)turnNow()}
+   else if(o.type==="gap"){if(jumpY<12)hit();else near++}
+   else if(o.type==="barrier"){if(jumpY<9)hit();else near++}
+   else if(o.type==="sign"){if(slideT<=0)hit();else near++}
+   else if(o.type==="crate"){if(jumpY<12&&slideT<=0)hit();else near++}
+  }
+  if(!o.hit&&same&&o.y>430&&o.y<472&&!['banana','seal','shield','magnet','boost','turn'].includes(o.type))near++;
+  if(o.y>570)objects.splice(i,1);
+ }
+
+ const px=laneX(lane,470),lean=(targetLane-lane)*.14,py=438-jumpY*3;
+ ctx.fillStyle="#17181777";ctx.beginPath();ctx.ellipse(px,464,29+Math.min(13,jumpY*.35),7,0,0,Math.PI*2);ctx.fill();
+ if(graceT>0&&Math.floor(sceneFrame/3)%2===0)ctx.globalAlpha=.42;
+ if(slideT>0){
+  ctx.save();ctx.translate(px,py+14);ctx.rotate(lean*.25);
+  ctx.fillStyle=save.costume==="pink"?"#e97ab6":save.costume==="blue"?"#73c5e8":save.costume==="gold"?"#f2c44c":"#bd7b38";
+  ctx.beginPath();ctx.ellipse(0,1,31,13,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="#594237";ctx.beginPath();ctx.ellipse(18,-1,12,9,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(21,-4,3,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+ }else{
+  ctx.save();ctx.translate(px,py);ctx.rotate(lean);ctx.translate(-px,-py);drawCharacter(px,py,1);ctx.restore();
+ }
+ ctx.globalAlpha=1;
+ if(chase>.03){ctx.save();ctx.globalAlpha=Math.min(.85,.16+chase*.52);drawMonster();ctx.restore()}
+ particles=particles.filter(p=>p.life-->0);
+ for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=.12*dt;ctx.globalAlpha=Math.max(0,p.life/25);ctx.fillStyle=p.color||"#ffdf68";ctx.beginPath();ctx.arc(p.x,p.y,Math.max(1,p.life*.16),0,Math.PI*2);ctx.fill()}
+ ctx.globalAlpha=1;ctx.restore();
+
+ $("runcoins").textContent=runCoins;$("meters").textContent=Math.floor(worldDistance);
+ $("powerhud").textContent=shieldT>0?"SHIELD":magnetT>0?"MAGNET":boostT>0?"BOOST":"NONE";
+ $("speedhud").textContent=speed<4.2?"CRUISING":speed<6?"RUNNING":"SPRINTING";
+ $("runbar").style.width=(mode==="free"?Math.min(100,worldDistance/10):Math.min(100,worldDistance/targetDistance()*100))+"%";
+ if(chase>=1.3){finish(false);return}
+ if((mode==="level"||mode==="free")&&!portalResolved&&worldDistance>=portalDistance){openPortalChoice();return}
+ if(mode==="level"&&worldDistance>=targetDistance()&&runCoins>=targetBananas()){finish(true);return}
+ if(mode==="tutorial"&&runCoins>=8){finish(true);return}
+ if(mode==="level"&&worldDistance>=targetDistance()&&runCoins<targetBananas())$("objective").textContent="The exit is close! Collect "+(targetBananas()-runCoins)+" more bananas to unlock it.";
+ if(mode==="free"&&worldDistance>save.best)save.best=Math.floor(worldDistance);
+ checkSecrets();raf=requestAnimationFrame(loop);
+}
+
+function finish(win){
+ running=false;
+ ended=true;
+ updatePowerDock();
+ cancelAnimationFrame(raf);
+
+ let bonus=0,earned=false;
+ recordRun(win);
+ save.longest=Math.max(save.longest,Math.floor(worldDistance));
+
+ if(mode==="free")save.best=Math.max(save.best,Math.floor(worldDistance));
+
+ if(win){
+  if(mode==="level"){
+   dailyProgress("level",1,false);
+   save.completed=Math.max(save.completed,level);
+   bonus=level*12+Math.floor(worldDistance/5);
+   if(level%3===0&&!save.seals.includes(level)){
+    save.seals.push(level);
+    earned=true;
+   }
+  }else if(mode==="tutorial"){
+   bonus=60;
+   save.tutorialSeen=true;
+  }
+
+  if(chase===0)save.missions.push("clean");
+  save.coins+=bonus;
+ }
+
+ checkSecrets();
+ persist();
+
+ let title=win?(earned?"TEMPLE SEAL EARNED!":"EXPEDITION COMPLETE!"):"THE CHASER CAUGHT YOU!";
+
+ let desc=win?
+  `Distance: ${Math.floor(worldDistance)} m<br>Bananas collected: ${runCoins}<br>Bonus reward: +${bonus} bananas${earned?"<br><br>🏵️ A new Temple Seal joins your collection!":""}`:
+  `Distance: ${Math.floor(worldDistance)} m<br>Bananas collected: ${runCoins}<br>Try changing lanes earlier and saving power-ups for dangerous sections.`;
+
+ overlay(
+  win?(earned?"🏵️":"🏆"):"👹",
+  title,
+  desc,
+  win&&mode==="level"&&level<30?"NEXT LEVEL":"RUN AGAIN",
+  ()=>win&&mode==="level"&&level<30?begin("level",level+1):begin(mode,level)
+ );
+
+ $("runstatus").textContent=win?"Expedition completed":"Expedition ended";
+}
+
+dailyEnsure();
+updateAll();
+theme(save.theme||"purple");
+$("difficulty").value=save.difficulty||"normal";
+$("soundEnabled").checked=save.sound!==false;
+$("volume").value=save.volume??40;
+renderLevels();
+renderShop();
+renderSecrets();
+</script>
+</body>
+</html>
